@@ -22,7 +22,7 @@ class TaskManager(models.Manager):
     def get_other_list(self):
         today = datetime.today()
         next_7 = today + relativedelta(days=7)
-        return Task.objects.filter(archived=False).filter(Q(completed=True) | Q(due_date__isnull=True) | Q(due_date__gt=next_7)).order_by('completed', F('due_date').asc(nulls_last=True))
+        return Task.objects.exclude(completed_on=today).filter(archived=False).filter(Q(completed=True) | Q(due_date__isnull=True) | Q(due_date__gt=next_7)).order_by('completed', F('due_date').asc(nulls_last=True))
 
 
 # Create your models here.
@@ -37,7 +37,7 @@ class Task(models.Model):
     completed = models.BooleanField()
     completed_on = models.DateField(blank=True, null=True)
 
-    archived = models.BooleanField()
+    archived = models.BooleanField(default=False)
 
     repeat = models.CharField(max_length=255, blank=True)
 
