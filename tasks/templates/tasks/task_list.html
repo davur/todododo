@@ -1,0 +1,24 @@
+{% extends "common/base.html" %}
+
+{% block page %}
+
+<a class="btn btn-primary" href="/tasks/new/">Add task</a>
+<hr/>
+
+{% include "tasks/task_list_inner.html" %}
+
+
+
+
+<h3>All (for debug reference)</h3>
+<div class="list-group">
+    {% for obj in object_list %}
+    <a class="{% if obj.completed %}text-decoration-line-through {% endif %}list-group-item" href="/tasks/{{ obj.pk }}/">
+        <input type=checkbox onclick="return false;" {% if obj.completed %}checked{% endif %}>
+        {{ obj.title }}
+    </a>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

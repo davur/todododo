@@ -1,0 +1,32 @@
+<h3>Today</h3>
+<div class="list-group">
+    {% for obj in today_list %}
+    <a class="{% if obj.completed %}text-decoration-line-through {% endif %}list-group-item" href="/tasks/{{ obj.pk }}/">
+        <input type=checkbox onclick="return false;" {% if obj.completed %}checked{% endif %}>
+        {{ obj.title }}
+    </a>
+    {% endfor %}
+</div>
+<hr/>
+
+<h3>Next 7 days</h3>
+<div class="list-group">
+    {% for obj in next_list %}
+    <a class="{% if obj.completed %}text-decoration-line-through {% endif %}list-group-item" href="/tasks/{{ obj.pk }}/">
+        <input type=checkbox onclick="return false;" {% if obj.completed %}checked{% endif %}>
+        {{ obj.title }}
+    </a>
+    {% endfor %}
+</div>
+<hr/>
+
+<h3>Other</h3>
+<div class="list-group">
+    {% for obj in other_list %}
+    <a class="{% if obj.completed %}text-decoration-line-through {% endif %}list-group-item" href="/tasks/{{ obj.pk }}/">
+        <input type=checkbox onclick="return false;" {% if obj.completed %}checked{% endif %}>
+        {{ obj.title }}
+    </a>
+    {% endfor %}
+</div>
+<hr/>
