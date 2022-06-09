@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
 
@@ -6,23 +6,33 @@ from django.db import models
 from django.db.models import F, Q
 
 
-
 class TaskManager(models.Manager):
-
     def get_today_list(self):
         today = datetime.today()
-        return Task.objects.filter(archived=False).filter(Q(due_date__lte=today, completed=False) | Q(completed_on=today)).order_by('due_date')
-
+        return (
+            Task.objects.filter(archived=False)
+            .filter(Q(due_date__lte=today, completed=False) | Q(completed_on=today))
+            .order_by('due_date')
+        )
 
     def get_next_list(self):
         today = datetime.today()
         next_7 = today + relativedelta(days=7)
-        return Task.objects.filter(archived=False).filter(due_date__gt=today, due_date__lte=next_7, completed=False)
+        return Task.objects.filter(archived=False).filter(
+            due_date__gt=today, due_date__lte=next_7, completed=False
+        )
 
     def get_other_list(self):
         today = datetime.today()
         next_7 = today + relativedelta(days=7)
-        return Task.objects.exclude(completed_on=today).filter(archived=False).filter(Q(completed=True) | Q(due_date__isnull=True) | Q(due_date__gt=next_7)).order_by('completed', F('due_date').asc(nulls_last=True))
+        return (
+            Task.objects.exclude(completed_on=today)
+            .filter(archived=False)
+            .filter(
+                Q(completed=True) | Q(due_date__isnull=True) | Q(due_date__gt=next_7)
+            )
+            .order_by('completed', F('due_date').asc(nulls_last=True))
+        )
 
 
 # Create your models here.
@@ -57,7 +67,7 @@ class Task(models.Model):
         # new_due_date = N unit after due_date
         if method == "every" and self.due_date:
             start_date = datetime.strptime(str(self.due_date), "%Y-%m-%d")
-        else: # if after == "after":
+        else:  # if after == "after":
             start_date = datetime.today()
 
         if unit[0] == "d":
@@ -66,11 +76,10 @@ class Task(models.Model):
             new_due_date = start_date + relativedelta(weeks=amount)
         elif unit[0] == "m":
             new_due_date = start_date + relativedelta(months=amount)
-        else: # if unit[0] == "y":
+        else:  # if unit[0] == "y":
             new_due_date = start_date + relativedelta(years=amount)
 
         return new_due_date
-
 
     def save(self, *args, **kwargs):
         repeat = str(self.repeat).lower()
@@ -87,7 +96,6 @@ class Task(models.Model):
         if self.pk:
             orig = Task.objects.get(pk=self.pk)
 
-
         if self.completed and (not orig or not orig.completed):
             self.completed_on = datetime.today()
 
@@ -95,12 +103,14 @@ class Task(models.Model):
                 new_due_date = self.calculate_next_due_date()
 
                 rep = Task.objects.create(
-                        title=self.title,
-                        description=self.description,
-                        completed=False,
-                        due_date=new_due_date.strftime("%Y-%m-%d") if new_due_date else None,
-                        repeat=self.repeat)
+                    title=self.title,
+                    description=self.description,
+                    completed=False,
+                    due_date=new_due_date.strftime("%Y-%m-%d")
+                    if new_due_date
+                    else None,
+                    repeat=self.repeat,
+                )
                 rep.save()
 
         super(Task, self).save(*args, **kwargs)
-
